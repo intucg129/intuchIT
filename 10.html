@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เกมตีตัวตุ่น - สารบริสุทธิ์</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    #game {
+      display: grid;
+      grid-template-columns: repeat(3, 120px);
+      grid-gap: 15px;
+      margin-bottom: 20px;
+    }
+    .hole {
+      width: 120px;
+      height: 120px;
+      background: #eee;
+      border-radius: 15px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+    .mole {
+      width: 100px;
+      height: 100px;
+      background: url('https://cdn-icons-png.flaticon.com/512/616/616408.png') no-repeat center/cover;
+      position: absolute;
+      bottom: -100px;
+      left: 10px;
+      transition: bottom 0.3s;
+    }
+    .up .mole {
+      bottom: 10px;
+    }
+    #score, #timer {
+      font-size: 20px;
+      margin: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4e54c8;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>เกมตีตัวตุ่น: สารบริสุทธิ์</h1>
+  <div id="score">คะแนน: 0</div>
+  <div id="timer">เวลา: 10:00</div>
+  <div id="game"></div>
+  <button onclick="startGame()">เริ่มเกม</button>
+  <audio id="hitSound" src="https://www.soundjay.com/button/sounds/button-16.mp3" preload="auto"></audio>
+
+  <script>
+    const game = document.getElementById('game');
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    const hitSound = document.getElementById('hitSound');
+    let score = 0;
+    let timeUp = false;
+    let countdown;
+    const gameDuration = 10 * 60; // 10 minutes
+
+    function createHoles() {
+      game.innerHTML = '';
+      for (let i = 0; i < 9; i++) {
+        const hole = document.createElement('div');
+        hole.classList.add('hole');
+        const mole = document.createElement('div');
+        mole.classList.add('mole');
+        hole.appendChild(mole);
+        hole.addEventListener('click', () => {
+          if (hole.classList.contains('up')) {
+            score++;
+            scoreDisplay.textContent = `คะแนน: ${score}`;
+            hitSound.currentTime = 0;
+            hitSound.play();
+            hole.classList.remove('up');
+          }
+        });
+        game.appendChild(hole);
+      }
+    }
+
+    function randomTime(min, max) {
+      return Math.round(Math.random() * (max - min) + min);
+    }
+
+    function randomHole(holes) {
+      const idx = Math.floor(Math.random() * holes.length);
+      return holes[idx];
+    }
+
+    function peep() {
+      const time = randomTime(400, 1200);
+      const holes = document.querySelectorAll('.hole');
+      const hole = randomHole(holes);
+      hole.classList.add('up');
+      setTimeout(() => {
+        hole.classList.remove('up');
+        if (!timeUp) peep();
+      }, time);
+    }
+
+    function startTimer(duration) {
+      let timeLeft = duration;
+      countdown = setInterval(() => {
+        const minutes = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+        const seconds = String(timeLeft % 60).padStart(2, '0');
+        timerDisplay.textContent = `เวลา: ${minutes}:${seconds}`;
+        timeLeft--;
+        if (timeLeft < 0) {
+          clearInterval(countdown);
+          timeUp = true;
+          alert(`หมดเวลา! คุณได้คะแนน ${score} คะแนน`);
+        }
+      }, 1000);
+    }
+
+    function startGame() {
+      score = 0;
+      scoreDisplay.textContent = 'คะแนน: 0';
+      timeUp = false;
+      createHoles();
+      startTimer(gameDuration);
+      peep();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>เกมวิทยาศาสตร์: พืชดอก & การสังเคราะห์แสง</title>
+  <style>
+    body {
+      font-family: 'Kanit', sans-serif;
+      background: #f1f8e9;
+      text-align: center;
+      padding: 20px;
+    }
+    .quiz-box {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      max-width: 700px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    .question {
+      font-size: 20px;
+      margin: 20px 0;
+    }
+    .answers button {
+      display: block;
+      background: #c5e1a5;
+      border: none;
+      padding: 12px;
+      margin: 10px auto;
+      width: 80%;
+      font-size: 18px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .answers button:hover {
+      background: #aed581;
+    }
+    .result {
+      font-size: 22px;
+      color: #2e7d32;
+      margin-top: 20px;
+    }
+    .timer {
+      font-size: 24px;
+      color: #d32f2f;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="quiz-box">
+    <h1>เกม: การสืบพันธุ์พืชดอก & สังเคราะห์แสง</h1>
+    <div class="timer" id="timer">เหลือเวลา: 20:00</div>
+    <div class="question" id="question"></div>
+    <div class="answers" id="answers"></div>
+    <div class="result" id="result"></div>
+  </div>
+
+  <!-- เสียงตอบถูก/ผิด -->
+  <audio id="correct-sound" src="https://www.soundjay.com/buttons/sounds/button-4.mp3"></audio>
+  <audio id="wrong-sound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+
+  <script>
+    const questionData = [
+      {
+        question: "การสังเคราะห์ด้วยแสงเกิดขึ้นที่ใดของพืช?",
+        correct: "ใบ",
+        answers: ["ใบ", "ราก", "ดอก"]
+      },
+      {
+        question: "สารตั้งต้นที่จำเป็นในการสังเคราะห์ด้วยแสงคือ?",
+        correct: "น้ำและคาร์บอนไดออกไซด์",
+        answers: ["น้ำและคาร์บอนไดออกไซด์", "ออกซิเจนและน้ำ", "แป้งและน้ำ"]
+      },
+      {
+        question: "พืชได้รับพลังงานจากอะไรในการสังเคราะห์ด้วยแสง?",
+        correct: "แสงแดด",
+        answers: ["แสงแดด", "ออกซิเจน", "ลม"]
+      },
+      {
+        question: "ผลของการสังเคราะห์ด้วยแสงคือ?",
+        correct: "ได้น้ำตาลและออกซิเจน",
+        answers: ["ได้น้ำตาลและออกซิเจน", "ได้คาร์บอนไดออกไซด์", "ได้รากใหม่"]
+      },
+      {
+        question: "การสืบพันธุ์ของพืชดอกใช้ส่วนใด?",
+        correct: "ดอก",
+        answers: ["ดอก", "ราก", "ใบ"]
+      },
+      {
+        question: "เกสรตัวผู้เรียกว่าอะไร?",
+        correct: "เกสรเพศผู้",
+        answers: ["เกสรเพศผู้", "เกสรเพศเมีย", "รังไข่"]
+      },
+      {
+        question: "การปฏิสนธิในพืชดอกคืออะไร?",
+        correct: "เซลล์สืบพันธุ์ผสมกัน",
+        answers: ["เซลล์สืบพันธุ์ผสมกัน", "การงอกของราก", "การแตกใบ"]
+      },
+      {
+        question: "ผลหลังจากผสมเกสรคืออะไร?",
+        correct: "เกิดเมล็ดและผล",
+        answers: ["เกิดเมล็ดและผล", "เกิดใบใหม่", "เกิดดอกรอบใหม่"]
+      },
+      {
+        question: "การขยายพันธุ์โดยใช้เมล็ดเป็นแบบใด?",
+        correct: "เพศ",
+        answers: ["เพศ", "ไม่อาศัยเพศ", "แปลงพันธุ์"]
+      },
+      {
+        question: "การตอนกิ่งคือการขยายพันธุ์แบบใด?",
+        correct: "ไม่อาศัยเพศ",
+        answers: ["ไม่อาศัยเพศ", "เพศ", "สืบพันธุ์ทางน้ำ"]
+      },
+      {
+        question: "พืชใช้รากในการขยายพันธุ์ได้หรือไม่?",
+        correct: "ได้ เช่น มันเทศ",
+        answers: ["ได้ เช่น มันเทศ", "ไม่ได้เลย", "เฉพาะพืชน้ำ"]
+      },
+      {
+        question: "โครงสร้างใดที่ทำหน้าที่สร้างอาหารในพืช?",
+        correct: "คลอโรพลาสต์",
+        answers: ["คลอโรพลาสต์", "ไซโตพลาซึม", "นิวเคลียส"]
+      },
+      {
+        question: "การติดผลของพืชเกิดขึ้นหลังจาก?",
+        correct: "การผสมเกสร",
+        answers: ["การผสมเกสร", "การเจริญของใบ", "การรดน้ำ"]
+      },
+      {
+        question: "พืชที่ใช้การปักชำในการขยายพันธุ์คือ?",
+        correct: "ชบา",
+        answers: ["ชบา", "ข้าว", "มะม่วง"]
+      },
+      {
+        question: "ดอกไม้ที่มีทั้งเกสรตัวผู้และเกสรตัวเมียเรียกว่า?",
+        correct: "ดอกสมบูรณ์",
+        answers: ["ดอกสมบูรณ์", "ดอกไม่สมบูรณ์", "ดอกเดี่ยว"]
+      },
+      {
+        question: "การขยายพันธุ์โดยการเพาะเลี้ยงเนื้อเยื่อเป็นแบบใด?",
+        correct: "ไม่อาศัยเพศ",
+        answers: ["ไม่อาศัยเพศ", "เพศ", "ธรรมชาติ"]
+      },
+      {
+        question: "การหายใจของพืชเกิดตอนไหน?",
+        correct: "ทั้งกลางวันและกลางคืน",
+        answers: ["ทั้งกลางวันและกลางคืน", "กลางวันเท่านั้น", "กลางคืนเท่านั้น"]
+      },
+      {
+        question: "ออกซิเจนที่พืชปล่อยออกมาจากกระบวนการใด?",
+        correct: "การสังเคราะห์ด้วยแสง",
+        answers: ["การสังเคราะห์ด้วยแสง", "การหายใจ", "การขยายพันธุ์"]
+      },
+      {
+        question: "ข้อใดไม่ใช่ประโยชน์ของการสังเคราะห์ด้วยแสง?",
+        correct: "ผลิตก๊าซพิษ",
+        answers: ["ผลิตก๊าซพิษ", "สร้างอาหาร", "ปล่อยออกซิเจน"]
+      },
+      {
+        question: "เมล็ดของพืชเกิดจากอะไร?",
+        correct: "รังไข่ที่ได้รับการปฏิสนธิ",
+        answers: ["รังไข่ที่ได้รับการปฏิสนธิ", "กลีบดอก", "ใบ"]
+      }
+    ];
+
+    const questions = shuffle(questionData).slice(0, 20);
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    let current = 0;
+    let score = 0;
+    let timeLeft = 20 * 60;
+
+    const qText = document.getElementById("question");
+    const qAnswers = document.getElementById("answers");
+    const qResult = document.getElementById("result");
+    const timer = document.getElementById("timer");
+    const correctSound = document.getElementById("correct-sound");
+    const wrongSound = document.getElementById("wrong-sound");
+
+    function updateTimer() {
+      const min = Math.floor(timeLeft / 60);
+      const sec = timeLeft % 60;
+      timer.textContent = `เหลือเวลา: ${min}:${sec.toString().padStart(2, '0')}`;
+      if (timeLeft <= 0) {
+        endGame();
+      } else {
+        timeLeft--;
+        setTimeout(updateTimer, 1000);
+      }
+    }
+
+    function showQuestion() {
+      const q = questions[current];
+      qText.textContent = `ข้อ ${current + 1}: ${q.question}`;
+      qAnswers.innerHTML = "";
+      q.answers.forEach(answer => {
+        const btn = document.createElement("button");
+        btn.textContent = answer;
+        btn.onclick = () => {
+          if (answer === q.correct) {
+            correctSound.play();
+            score++;
+          } else {
+            wrongSound.play();
+          }
+          current++;
+          if (current < questions.length) {
+            showQuestion();
+          } else {
+            endGame();
+          }
+        };
+        qAnswers.appendChild(btn);
+      });
+    }
+
+    function endGame() {
+      qText.style.display = "none";
+      qAnswers.style.display = "none";
+      timer.style.display = "none";
+      qResult.innerHTML = `<strong>คุณได้ ${score} จาก 20 คะแนน</strong>`;
+    }
+
+    // เริ่มเกม
+    showQuestion();
+    updateTimer();
+  </script>
+  <footer>
+    ® 2025 เว็บไซต์ของ วันดี ชุมทอง
+  </footer>
+</body>
+</html>

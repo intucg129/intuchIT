@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>เกมพื้นฐานของสิ่งมีชีวิต</title>
+  <style>
+    body {
+      font-family: 'Kanit', sans-serif;
+      background: #e8f5e9;
+      text-align: center;
+      padding: 20px;
+    }
+    .quiz-box {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      max-width: 700px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    .question {
+      font-size: 20px;
+      margin: 20px 0;
+    }
+    .answers button {
+      display: block;
+      background: #aed581;
+      border: none;
+      padding: 12px;
+      margin: 10px auto;
+      width: 80%;
+      font-size: 18px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .answers button:hover {
+      background: #9ccc65;
+    }
+    .result {
+      font-size: 22px;
+      color: #2e7d32;
+      margin-top: 20px;
+    }
+    .timer {
+      font-size: 24px;
+      color: #d32f2f;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="quiz-box">
+    <h1>เกม: พื้นฐานของสิ่งมีชีวิต</h1>
+    <div class="timer" id="timer">เหลือเวลา: 20:00</div>
+    <div class="question" id="question"></div>
+    <div class="answers" id="answers"></div>
+    <div class="result" id="result"></div>
+  </div>
+
+  <!-- เสียงตอบถูก/ผิด -->
+  <audio id="correct-sound" src="https://www.soundjay.com/buttons/sounds/button-4.mp3"></audio>
+  <audio id="wrong-sound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+
+  <script>
+    const questionData = [
+      {
+        question: "หน่วยพื้นฐานของสิ่งมีชีวิตคืออะไร?",
+        correct: "เซลล์",
+        answers: ["เซลล์", "เนื้อเยื่อ", "อวัยวะ"]
+      },
+      {
+        question: "สิ่งมีชีวิตทุกชนิดมีอะไรเหมือนกัน?",
+        correct: "ประกอบด้วยเซลล์",
+        answers: ["ประกอบด้วยเซลล์", "มีระบบหายใจ", "มีสมอง"]
+      },
+      {
+        question: "กล้องจุลทรรศน์ใช้เพื่ออะไร?",
+        correct: "ส่องดูสิ่งมีชีวิตขนาดเล็ก",
+        answers: ["ส่องดูสิ่งมีชีวิตขนาดเล็ก", "ดูดฝุ่น", "ตรวจสอบอากาศ"]
+      },
+      {
+        question: "เนื้อเยื่อคืออะไร?",
+        correct: "กลุ่มของเซลล์ที่ทำหน้าที่ร่วมกัน",
+        answers: ["กลุ่มของเซลล์ที่ทำหน้าที่ร่วมกัน", "อวัยวะ", "ของเหลวในร่างกาย"]
+      },
+      {
+        question: "สิ่งมีชีวิตสามารถเจริญเติบโตได้ด้วยอะไร?",
+        correct: "การแบ่งเซลล์",
+        answers: ["การแบ่งเซลล์", "การดูดซึมแสง", "การหายใจเท่านั้น"]
+      },
+      {
+        question: "ข้อใดคือลักษณะของสิ่งมีชีวิต?",
+        correct: "ตอบสนองต่อสิ่งเร้า",
+        answers: ["ตอบสนองต่อสิ่งเร้า", "หยุดนิ่ง", "ไม่มีพลังงาน"]
+      },
+      {
+        question: "ระบบที่ทำหน้าที่ขนส่งเลือดเรียกว่า?",
+        correct: "ระบบไหลเวียนโลหิต",
+        answers: ["ระบบไหลเวียนโลหิต", "ระบบหายใจ", "ระบบประสาท"]
+      },
+      {
+        question: "DNA มีหน้าที่อะไร?",
+        correct: "ควบคุมลักษณะทางพันธุกรรม",
+        answers: ["ควบคุมลักษณะทางพันธุกรรม", "ควบคุมการหายใจ", "เป็นพลังงาน"]
+      },
+      {
+        question: "โครงสร้างใดควบคุมกิจกรรมของเซลล์?",
+        correct: "นิวเคลียส",
+        answers: ["นิวเคลียส", "ไซโตพลาซึม", "ผนังเซลล์"]
+      },
+      {
+        question: "พืชมีโครงสร้างพิเศษที่สัตว์ไม่มีคือ?",
+        correct: "คลอโรพลาสต์",
+        answers: ["คลอโรพลาสต์", "ไมโทคอนเดรีย", "นิวเคลียส"]
+      }
+    ];
+
+    // ทำซ้ำสุ่มให้ได้ 20 ข้อ
+    const questions = [];
+    while (questions.length < 20) {
+      const q = JSON.parse(JSON.stringify(questionData[Math.floor(Math.random() * questionData.length)]));
+      q.answers = shuffle(q.answers);
+      questions.push(q);
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    let current = 0;
+    let score = 0;
+    let timeLeft = 20 * 60;
+
+    const qText = document.getElementById("question");
+    const qAnswers = document.getElementById("answers");
+    const qResult = document.getElementById("result");
+    const timer = document.getElementById("timer");
+    const correctSound = document.getElementById("correct-sound");
+    const wrongSound = document.getElementById("wrong-sound");
+
+    function updateTimer() {
+      const min = Math.floor(timeLeft / 60);
+      const sec = timeLeft % 60;
+      timer.textContent = `เหลือเวลา: ${min}:${sec.toString().padStart(2, '0')}`;
+      if (timeLeft <= 0) {
+        endGame();
+      } else {
+        timeLeft--;
+        setTimeout(updateTimer, 1000);
+      }
+    }
+
+    function showQuestion() {
+      const q = questions[current];
+      qText.textContent = `ข้อ ${current + 1}: ${q.question}`;
+      qAnswers.innerHTML = "";
+      q.answers.forEach(answer => {
+        const btn = document.createElement("button");
+        btn.textContent = answer;
+        btn.onclick = () => {
+          if (answer === q.correct) {
+            correctSound.play();
+            score++;
+          } else {
+            wrongSound.play();
+          }
+          current++;
+          if (current < questions.length) {
+            showQuestion();
+          } else {
+            endGame();
+          }
+        };
+        qAnswers.appendChild(btn);
+      });
+    }
+
+    function endGame() {
+      qText.style.display = "none";
+      qAnswers.style.display = "none";
+      timer.style.display = "none";
+      qResult.innerHTML = `<strong>คุณได้ ${score} จาก 20 คะแนน</strong>`;
+    }
+
+    // เริ่มเกม
+    showQuestion();
+    updateTimer();
+  </script>
+</body>
+</html>
